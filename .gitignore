@@ -1,0 +1,4 @@
+static/logs/*
+go_build_main_go
+static/server.json
+.idea/*
