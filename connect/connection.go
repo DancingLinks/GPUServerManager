@@ -1,7 +1,6 @@
 package connect
 
 import (
-	"github.com/GPUServerManager/log"
 	"golang.org/x/crypto/ssh"
 	"net"
 	"strings"
@@ -43,7 +42,6 @@ func Work(config ServerConfig, ch chan string) {
 			}
 			status += "|"
 		}
-		log.InfoLog(status)
 		ch <- status
 		time.Sleep(time.Second * 10)
 	}

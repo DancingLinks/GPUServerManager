@@ -10,7 +10,7 @@ import (
 func main() {
 	utils.InitConstants()
 	log.InitLog()
-	log.Log("Hello world!", log.INFO)
+	log.Log("Starting GPU Mangager...", log.INFO)
 	ServerSlice, _ := connect.ParseServerConfig()
 	ch := make(chan string)
 	defer close(ch)
