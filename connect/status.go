@@ -5,6 +5,10 @@ import (
 	"strings"
 )
 
+var (
+	GPUMap map[string]GPUList
+)
+
 type GPUList struct {
 	ID string
 	GPUStatus []GPUStatus
@@ -40,4 +44,9 @@ func Parse(status string) GPUList {
 		gpuList.GPUStatus = append(gpuList.GPUStatus, status)
 	}
 	return gpuList
+}
+
+func UpdateGPUStatus(status string) {
+	gpuList := Parse(status)
+	GPUMap[gpuList.ID] = gpuList
 }

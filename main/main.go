@@ -1,15 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"github.com/GPUServerManager/connect"
 	"github.com/GPUServerManager/log"
+	"github.com/GPUServerManager/socket"
 	"github.com/GPUServerManager/utils"
-)
-
-var (
-	ServerSlice connect.Server
-	GPUMap map[string]connect.GPUList
 )
 
 func main() {
@@ -22,11 +17,9 @@ func main() {
 	for i := range ServerSlice.Servers {
 		go connect.Work(ServerSlice.Servers[i], ch)
 	}
-	GPUMap = map[string]connect.GPUList{}
+	connect.GPUMap = map[string]connect.GPUList{}
+	go socket.StartService()
 	for status := range ch {
-		gpuList := connect.Parse(status)
-		GPUMap[gpuList.ID] = gpuList
-		fmt.Println(GPUMap)
+		connect.UpdateGPUStatus(status)
 	}
 }
-
