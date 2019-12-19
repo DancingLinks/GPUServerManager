@@ -4,3 +4,4 @@ static/server.json
 .idea/*
 go_build
 vendor/*
+build/*
