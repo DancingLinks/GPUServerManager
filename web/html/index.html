@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Block-chain Books</title>
+        <link href="/web/css/bootstrap.min.css" rel="stylesheet">
+        <script src="/web/js/jquery.js"></script>
+        <script src="/web/js/bootstrap.js"></script>
+        <script src="/web/js/vue.js"></script>
+        <style>
+            .table thead>tr>th {
+                text-align: center;
+            }
+            .table tbody>tr>th {
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="row" style="padding-top: 60px">
+            <div class="col-md-2"></div>
+            <div class="col-md-8">
+                <div id="app">
+                    <div class="panel panel-primary" v-for="(v,k) in GPUs">
+                        <!-- Default panel contents -->
+                        <div class="panel-heading">{{ v.ID }}</div>
+                        <!-- Table -->
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th class="col-md-2">Ok</th>
+                                <th class="col-md-2">Power</th>
+                                <th class="col-md-2">Temperature</th>
+                                <th class="col-md-2">Utilization</th>
+                                <th class="col-md-4">Memory</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr v-for="(status,k) in v.GPUStatus">
+                                <th class="col-md-2">{{ status.Ok }}</th>
+                                <th class="col-md-2">{{ status.Power }} W</th>
+                                <th class="col-md-2">{{ status.Temperature }} C</th>
+                                <th class="col-md-2">{{ status.Utilization }} %</th>
+                                <th class="col-md-4">{{ status.Memory }} MB</th>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2"></div>
+        </div>
+
+        <script>
+
+            var app = new Vue({
+                el: '#app',
+                data: {
+                    GPUs: [],
+                },
+                methods: {
+                    setGPUs: function(gpus) {
+                        this.GPUs = gpus
+                    }
+                }
+
+            });
+
+            let sock = null;
+            let wsuri = "ws://127.0.0.1:88/websocket";
+            window.onload = function() {
+                console.log("onload");
+                sock = new WebSocket(wsuri);
+                sock.onopen = function() {
+                    console.log("connected to " + wsuri);
+
+                };
+                sock.onclose = function(e) {
+                    console.log("connection closed (" + e.code + ")");
+                };
+                sock.onmessage = function(e) {
+                    let jd = JSON.parse(e.data);
+                    let gpus = JSON.parse(jd.Data);
+                    // console.log(gpus);
+                    // console.log(gpus[0].ID,gpus[1].ID,gpus[2].ID)
+                    gpus.sort((a, b) => {
+                        if (a.ID < b.ID) {
+                            return -1;
+                        } else if (a.ID > b.ID) {
+                            return 1;
+                        }else{
+                            return 0;
+                        }
+                    });
+                    console.log(gpus[0].ID,gpus[1].ID,gpus[2].ID)
+                    app.setGPUs(gpus)
+                }
+            };
+
+            function sortGPU(a, b) {
+                // console.log(a.ID > b.ID)
+                return a.ID > b.ID
+            }
+
+            function sleep (time) {
+                return new Promise((resolve) => setTimeout(resolve, time));
+            }
+
+            function sendMessage() {
+                sleep(500).then(() => {
+                    sock.send('{"op":1}');
+                    sendMessage()
+                });
+            }
+            sendMessage()
+
+        </script>
+    </body>
+</html>
+
+
