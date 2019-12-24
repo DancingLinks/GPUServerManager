@@ -29,18 +29,25 @@ func Work(config ServerConfig, ch chan string) {
 			session = GetSession(addr, sshClientConf)
 		}
 		response := Run(session, "nvidia-smi dmon -c 1 -s pum")
-		statusList := strings.Split(response, "\n")
-		statusList = statusList[2:len(statusList)-1]
 		status := config.ID+"|"
-		for i := 0; i < config.GpuCount; i ++ {
-			if i < len(statusList) {
-				p := strings.Fields(statusList[i])
-				// gpu pwr gtemp mtemp sm mem enc dec fb bar1
-				status += "1,"+p[1]+","+p[2]+","+p[4]+","+p[8]
-			} else {
-				status += "0"
+		if response == "" {
+			for i := 0; i < config.GpuCount; i ++ {
+				status += "0|"
 			}
-			status += "|"
+
+		} else {
+			statusList := strings.Split(response, "\n")
+			statusList = statusList[2:len(statusList)-1]
+			for i := 0; i < config.GpuCount; i ++ {
+				if i < len(statusList) {
+					p := strings.Fields(statusList[i])
+					// gpu pwr gtemp mtemp sm mem enc dec fb bar1
+					status += "1,"+p[1]+","+p[2]+","+p[4]+","+p[8]
+				} else {
+					status += "0"
+				}
+				status += "|"
+			}
 		}
 		ch <- status
 		time.Sleep(time.Second * 10)
