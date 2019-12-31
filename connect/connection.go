@@ -24,10 +24,14 @@ func Work(config ServerConfig, ch chan string) {
 			return nil
 		},
 	}
+	var client *ssh.Client
+	for client == nil {
+		client = GetClient(addr, sshClientConf)
+	}
 	for {
 		var session *ssh.Session
 		for session == nil {
-			session = GetSession(addr, sshClientConf)
+			session = GetSession(client)
 		}
 		response := Run(session, "nvidia-smi dmon -c 1 -s pum")
 		status := config.ID+"|"

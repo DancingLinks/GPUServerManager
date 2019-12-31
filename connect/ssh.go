@@ -7,15 +7,18 @@ import (
 	"time"
 )
 
-func GetSession(addr string, config *ssh.ClientConfig) *ssh.Session {
-	var session *ssh.Session
+func GetClient(addr string, config *ssh.ClientConfig) *ssh.Client{
 	client, err := ssh.Dial("tcp", addr, config)
 	if err != nil {
 		log.ErrorLog("Failed to dial: " + err.Error())
 		time.Sleep(time.Second)
 		return nil
 	}
-	session, err = client.NewSession()
+	return client
+}
+
+func GetSession(client *ssh.Client) *ssh.Session {
+	session, err := client.NewSession()
 	if err != nil {
 		log.ErrorLog("Failed to create session: " + err.Error())
 		time.Sleep(time.Second)
@@ -25,6 +28,7 @@ func GetSession(addr string, config *ssh.ClientConfig) *ssh.Session {
 }
 
 func Run(session *ssh.Session, cmd string) string {
+	defer session.Close()
 	var b bytes.Buffer
 	session.Stdout = &b
 	if err := session.Run(cmd); err != nil {
